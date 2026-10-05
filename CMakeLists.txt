@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+project(feudsolver LANGUAGES CXX)
+add_executable(feudsolver engine/main.cpp)
+target_compile_features(feudsolver PRIVATE cxx_std_17)
+target_compile_options(feudsolver PRIVATE -Wall -Wextra -Wpedantic)

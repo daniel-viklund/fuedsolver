@@ -1,0 +1,8 @@
+.venv/
+build/
+__pycache__/
+.pytest_cache/
+data/swedish.txt
+data/dictionary-source/
+.DS_Store
+*.log
