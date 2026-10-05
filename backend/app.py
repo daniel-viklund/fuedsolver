@@ -11,9 +11,8 @@ from pydantic import BaseModel, Field, field_validator
 
 from .board import ALPHABET, POINTS, standard_bonuses
 from .ocr import recognize
+from .paths import ROOT, ENGINE
 
-ROOT = Path(__file__).resolve().parents[1]
-ENGINE = Path(os.environ.get("FEUD_ENGINE", ROOT / "build/feudsolver"))
 DICTIONARY = Path(os.environ.get("FEUD_DICTIONARY", ROOT / "data/swedish.txt"))
 MAX_UPLOAD = 12 * 1024 * 1024
 ocr_lock = threading.Lock()
@@ -49,7 +48,7 @@ class Position(BaseModel):
 
 @app.get("/api/health")
 def health():
-    return {"engine_ready":ENGINE.is_file(), "dictionary_ready":DICTIONARY.is_file(),
+    return {"engine_ready":ENGINE.is_file(), "dictionary_ready":DICTIONARY.is_file(), "example_available":(ROOT / "examples/screenshot.json").is_file(),
             "dictionary_name":DICTIONARY.name, "dictionary_kind":"DSSO spelling entries (not SAOL)" if DICTIONARY.name=="swedish.txt" else "Custom dictionary",
             "bonuses":standard_bonuses(), "points":POINTS}
 
@@ -83,12 +82,12 @@ def example():
 @app.post("/api/solve")
 def solve(position: Position):
     if not ENGINE.is_file() or not DICTIONARY.is_file():
-        raise HTTPException(503,"Run scripts/setup.sh to build the engine and install a dictionary.")
+        raise HTTPException(503,"Engine or dictionary missing. Extract the complete portable app folder, or run the setup script for your platform.")
     if not solve_slots.acquire(blocking=False):
         raise HTTPException(429,"The engine is busy. Try again shortly.")
     try:
         result = subprocess.run([str(ENGINE), "--dictionary", str(DICTIONARY), "--limit", str(position.limit)],
-                                input=position.model_dump_json(exclude={"limit"}), capture_output=True, text=True, timeout=30)
+                                input=position.model_dump_json(exclude={"limit"}), capture_output=True, text=True, encoding="utf-8", timeout=30)
         if result.returncode:
             try: message=json.loads(result.stderr).get("error","Engine rejected the position.")
             except json.JSONDecodeError: message="Engine failed to read this position."

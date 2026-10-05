@@ -7,6 +7,7 @@ import random
 import subprocess
 
 import pytest
+from backend.paths import ENGINE
 
 ROOT=Path(__file__).resolve().parents[1]
 VALUES=dict(zip("ABCDEFGHIJKLMNOPRSTUVXYZÅÄÖ",[1,3,8,1,1,3,2,3,1,7,3,2,3,1,2,4,1,1,1,4,3,8,7,8,4,4,4]))
@@ -17,8 +18,8 @@ def position(rack, tiles=()):
     return {'board':[''.join(row) for row in grid], 'rack':rack, 'bonuses':[['']*15 for _ in range(15)]}
 
 def run_engine(tmp_path, pos, words):
-    dictionary=tmp_path/'words.txt';dictionary.write_text('\n'.join(words)+'\n')
-    result=subprocess.run([str(ROOT/'build/feudsolver'),'--dictionary',str(dictionary),'--limit','1000'],input=json.dumps(pos),text=True,capture_output=True)
+    dictionary=tmp_path/'words.txt';dictionary.write_text('\n'.join(words)+'\n',encoding='utf-8')
+    result=subprocess.run([str(ENGINE),'--dictionary',str(dictionary),'--limit','1000'],input=json.dumps(pos),text=True,encoding='utf-8',capture_output=True)
     assert result.returncode==0,result.stderr
     return json.loads(result.stdout)
 
@@ -102,7 +103,7 @@ def test_board_edge_and_word_extension(tmp_path):
     assert any(m['tiles']==[{'row':0,'col':14,'letter':'T','blank':False}] for m in moves)
 
 def test_invalid_positions_fail_cleanly(tmp_path):
-    dictionary=tmp_path/'words.txt';dictionary.write_text('ÅT\n')
-    result=subprocess.run([str(ROOT/'build/feudsolver'),'--dictionary',str(dictionary)],input='{"board":[],"rack":"A"}',text=True,capture_output=True)
+    dictionary=tmp_path/'words.txt';dictionary.write_text('ÅT\n',encoding='utf-8')
+    result=subprocess.run([str(ENGINE),'--dictionary',str(dictionary)],input='{"board":[],"rack":"A"}',text=True,encoding='utf-8',capture_output=True)
     assert result.returncode==1
     assert 'error' in json.loads(result.stderr)

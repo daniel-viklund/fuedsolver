@@ -12,7 +12,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_provided_screenshot_matches_human_transcription(width):
     source=ROOT/'IMG_3527.PNG'
     if not source.exists():pytest.skip('User screenshot not present')
-    expected=json.loads((ROOT/'examples/screenshot.json').read_text())
+    expected=json.loads((ROOT/'examples/screenshot.json').read_text(encoding='utf-8'))
     image=Image.open(source);image=image.resize((width,round(image.height*width/image.width)))
     data=io.BytesIO();image.save(data,format='PNG')
     actual=recognize(data.getvalue())

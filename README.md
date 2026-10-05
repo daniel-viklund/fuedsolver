@@ -6,7 +6,15 @@ The C++ engine is a separate executable. The Python backend converts screenshots
 
 ## Run it
 
-Requires Python 3.11+, CMake, and a C++17 compiler. On macOS, install Apple's command line tools if you do not already have a compiler. The optional Vision OCR fallback also uses Swift.
+### Portable download (no installation)
+
+The Windows packaging workflow creates **Feudsolver-windows-x64.zip**. Extract the entire ZIP, open the `Feudsolver` folder, and double-click **Feudsolver.exe** (or `scripts\run.bat`). The browser opens automatically. No Python, CMake, or C++ Build Tools are needed on the recipient's PC. Keep the app window open while using it; Ctrl+C stops it.
+
+Keep the `bin`, `web`, `data`, and `_internal` folders beside the application. The C++ engine is a separate precompiled `bin\feudsolver.exe`; the Python runtime and dependencies are bundled. The dictionary and font are included. The original personal screenshot is excluded; upload your own position. The package is for 64-bit Windows, and is not code-signed.
+
+To build a package from source, see **Build a portable package** below. The following setup instructions are for development from source.
+
+Requires Python 3.12+, CMake, and a C++17 compiler. On macOS, install Apple's command line tools if you do not already have a compiler. The optional Vision OCR fallback also uses Swift.
 
 ```sh
 ./scripts/setup.sh
@@ -24,6 +32,8 @@ Open **http://127.0.0.1:8000** on your Mac. Choose **Choose from Photos** or **P
 
 ### Use it from your phone
 
+For Windows setup and launch commands, see **Windows** below.
+
 Keep the Mac awake, run `./scripts/run.sh`, and connect both devices to the same Wi-Fi. On the Mac, `ipconfig getifaddr en0` usually shows the Wi-Fi address (or find it in System Settings → Wi-Fi → Details → TCP/IP). On the phone, open `http://<mac-ip>:8000`; `localhost` on the phone refers to the phone itself.
 
 **Choose from Photos** opens the system image picker so you can select a saved screenshot. The file input has no camera-capture restriction. PNG, JPEG, and WebP are supported. If the server was already running before changing its network binding, restart it. If the address still cannot be reached, check whether the macOS firewall allows incoming Python connections and whether the Wi-Fi is a guest network that isolates devices.
@@ -31,6 +41,35 @@ Keep the Mac awake, run `./scripts/run.sh`, and connect both devices to the same
 On phones, the bottom navigation switches between **Image**, **Board**, and **Moves**. Uploading opens the board editor automatically; solving opens the moves view. The board stays visible while you scroll through results, and Previous/Next buttons cycle placements without scrolling the page. Editing the board or rack clears outdated results. Bonus editing, import/export, and instructions are under **Board tools & help**. Recognition messages expand when tapped. Larger screens keep the side-by-side workspace.
 
 **Paste image** reads the clipboard directly when the browser permits it. Browsers require a secure context for that API: `http://localhost` on the Mac qualifies, but `http://<mac-ip>:8000` on a phone does not. On that connection, the button reveals an editable box: touch and hold it, then choose the browser's **Paste** action. Support for exposing images through native paste varies; if no image paste is offered, use Photos. A trusted HTTPS deployment would enable the direct clipboard API on the phone (subject to its browser's paste permission). See [WebKit's clipboard documentation](https://webkit.org/blog/10855/async-clipboard-api/).
+
+### Windows
+
+Install Python 3.12 or newer, CMake (available on PATH), and Visual Studio Build Tools with the **Desktop development with C++** workload. In PowerShell or Command Prompt, open the project folder and run:
+
+```powershell
+.\scripts\setup.bat
+.\scripts\run.bat
+```
+
+Setup is only needed once, or after dependencies or engine source change. Use a Windows-created virtual environment and build directory; do not copy `.venv` or `build` from macOS. The launcher works from either shell and uses `.venv\Scripts\python.exe`. It selects `build\Release\feudsolver.exe` for Visual Studio builds, or `build\feudsolver.exe` for single-configuration builds. It also enables UTF-8 so Swedish letters survive Windows' default text encoding.
+
+Open **http://localhost:8000** on the PC. For a phone on the same Wi-Fi, run `ipconfig` and use `http://<Wi-Fi-IPv4-address>:8000`. If prompted by Windows Firewall, allow Python on your private network. Keep the PC awake and the terminal running; **Ctrl+C** stops the server.
+
+To change the port in PowerShell:
+
+```powershell
+$env:PORT = "8001"
+.\scripts\run.bat
+```
+
+In Command Prompt:
+
+```bat
+set PORT=8001
+scripts\run.bat
+```
+
+The launcher also honors `FEUD_HOST`, `FEUD_ENGINE`, and `FEUD_DICTIONARY`, like the macOS launcher. Classic-font screenshot recognition works on Windows without Swift or an external OCR service; Tesseract with Swedish language data is an optional fallback.
 
 ## Architecture
 
@@ -53,6 +92,24 @@ Browser: scores + placement previews
 - `scripts/vision.swift`: optional local macOS Vision fallback for poorly matching glyphs. Linux can optionally use Tesseract with Swedish language data (`tesseract-ocr` and `tesseract-ocr-swe` on Debian/Ubuntu).
 - `backend/app.py`: validates requests, runs recognition and the executable with timeouts, and serves the frontend.
 - `web/`: responsive vanilla HTML/CSS/JavaScript. No Node build step. UI fonts are fetched from Google Fonts, with system-font fallbacks; screenshot data stays local.
+
+## Build a portable package
+
+The package must be built on its target OS. Windows binaries cannot be produced by compiling normally on a Mac. Use a Windows machine or the included GitHub Actions workflow; only the builder needs the development tools.
+
+In GitHub, open **Actions → Windows portable app → Run workflow** once the workflow is on the default branch. It also runs on `v*` tags and `codex/windows-portable*` build branches. The workflow builds the engine with a static MSVC runtime, bundles Python with PyInstaller, runs the existing tests, and checks the extracted ZIP with an empty PATH. That check loads the website, recognizes the sample screenshot, and solves a Swedish position using only files in the package. Download the **Feudsolver-windows-x64** artifact and share the ZIP inside it. It is retained for 30 days.
+
+To build locally after setting up the development environment:
+
+```powershell
+.venv\Scripts\python.exe -m pip install -r requirements-packaging.txt
+.venv\Scripts\python.exe scripts\package.py
+.venv\Scripts\python.exe scripts\check_package.py dist\Feudsolver-windows-x64.zip
+```
+
+On macOS/Linux, use `.venv/bin/python` instead; the archive name reflects that platform. Output is in `dist/`. PyInstaller uses `build/pyinstaller/` separately from the C++ build. Set `FEUD_OPEN_BROWSER=0` to suppress the portable application's automatic browser launch. `PORT`, `FEUD_HOST`, `FEUD_ENGINE`, and `FEUD_DICTIONARY` also work with the portable executable.
+
+The ZIP includes the dictionary's unmodified source, filtering script, and licenses, as well as dependency license notices. The script-based source launchers automatically use a portable application when one is present at the project root.
 
 ## Standalone engine
 

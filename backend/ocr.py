@@ -14,8 +14,8 @@ import numpy as np
 from PIL import Image, ImageOps
 from .board import ALPHABET, standard_bonuses
 from .glyphs import recognize_glyph
+from .paths import ROOT
 
-ROOT = Path(__file__).resolve().parents[1]
 
 def runs(mask):
     edges = np.diff(np.r_[False, mask, False].astype(int))
@@ -60,14 +60,14 @@ def detect_geometry(image):
 def read_tiles(paths):
     helper = ROOT / "build/vision-ocr"
     if helper.exists():
-        result = subprocess.run([str(helper)], input=json.dumps([str(p) for p in paths]), text=True, capture_output=True, timeout=90)
+        result = subprocess.run([str(helper)], input=json.dumps([str(p) for p in paths]), text=True, encoding="utf-8", capture_output=True, timeout=90)
         if result.returncode:
             raise ValueError("The local OCR helper failed: " + result.stderr[:300])
         return json.loads(result.stdout)
     if shutil.which("tesseract"):
         results = []
         for path in paths:
-            result = subprocess.run(["tesseract", str(path), "stdout", "-l", "swe", "--psm", "10"], capture_output=True, text=True, timeout=5)
+            result = subprocess.run(["tesseract", str(path), "stdout", "-l", "swe", "--psm", "10"], capture_output=True, text=True, encoding="utf-8", timeout=5)
             if result.returncode:
                 raise ValueError("Tesseract failed. Install the Swedish (swe) language data.")
             results.append([{"text":result.stdout.strip(), "confidence":.5}])

@@ -1,11 +1,11 @@
 """Template OCR for the classic Wordfeud typeface, independent of board contents."""
 from functools import lru_cache
-from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from .board import ALPHABET
+from .paths import ROOT
 
-FONT = Path(__file__).resolve().parents[1] / "data/fonts/DroidSansMono.ttf"
+FONT = ROOT / "data/fonts/DroidSansMono.ttf"
 
 def normalize(mask):
     # Discard score digits and edge noise, retaining the glyph and its diacritics.
