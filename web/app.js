@@ -99,7 +99,7 @@ function render() {
     value.textContent=occupied && char!=='?' ? (char===char.toUpperCase()?points[char]??'':0) : '';
     input.setAttribute('aria-label',`${String.fromCharCode(65+c)}${r+1}: ${occupied?char:position.bonuses[r][c] || 'empty'}`);
   }
-  $('board-summary').textContent=count?`${count} tiles on the board${uncertain.size?` · ${uncertain.size} to check`:''}`:'An empty board. A fresh start.';
+  $('board-summary').textContent=count?`${count} tiles on the board${uncertain.size?` · ${uncertain.size} to check`:''}`:'Empty board';
   $('clear-preview').hidden=!selected;
   updateMoveNavigation();
 }

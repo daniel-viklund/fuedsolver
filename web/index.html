@@ -2,22 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Feudsolver — Find your next word</title>
-  <meta name="description" content="A Swedish Wordfeud analysis board. Read a screenshot, check your tiles, and explore the highest-scoring moves.">
+  <title>Feudsolver — Swedish Wordfeud solver</title>
+  <meta name="description" content="Upload a Wordfeud screenshot, edit the board and rack, and calculate moves using a Swedish dictionary.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/mobile.css">
   <script defer src="/app.js"></script>
 </head>
 <body data-mobile-view="upload">
-  <header><a class="brand" href="/" aria-label="Feudsolver home"><span class="brand-tile">f<span>4</span></span>feudsolver<span class="beta">LAB</span></a><div class="header-right"><span class="status-dot"></span><span id="engine-status">Connecting to engine</span><span class="language">SE / Svenska</span></div></header>
+  <header><a class="brand" href="/" aria-label="Feudsolver home"><span class="brand-tile">f<span>4</span></span>feudsolver</a><div class="header-right"><span class="status-dot"></span><span id="engine-status">Connecting to engine</span><span class="language">SE / Svenska</span></div></header>
   <main>
-    <div class="intro"><div><p class="eyebrow">A LITTLE CLARITY FOR YOUR NEXT MOVE</p><h1>Every tile. <em>More possibility.</em></h1><p class="subtitle">Turn a screenshot into a board. Find the words hiding in your rack.</p></div><span class="local-tag">↳ Runs on your machine</span></div>
     <details id="message" role="status" aria-live="polite" hidden><summary id="message-title"></summary><p id="message-detail"></p></details>
     <div class="workspace">
       <aside class="source-panel">
-        <div class="section-label"><span>01</span> YOUR POSITION</div>
+        <div class="section-label"><span>01</span> IMAGE</div>
         <div class="dropzone" id="dropzone">
           <input type="file" id="file" accept="image/png,image/jpeg,image/webp" hidden>
-          <strong>Add your screenshot</strong>
+          <strong>Upload screenshot</strong>
           <div class="upload-actions">
             <button type="button" id="choose-photo" class="upload-button upload-primary">Choose from Photos</button>
             <button type="button" id="paste-image" class="upload-button" aria-controls="manual-paste">Paste image</button>
@@ -29,15 +28,15 @@
           </div>
           <p id="upload-feedback" role="status" aria-live="polite" hidden></p>
         </div>
-        <details class="example-options"><summary>Try an example</summary><button class="text-button example" id="example">Use the example screenshot <span>↗</span></button></details>
-        <button id="enter-manually" class="text-button mobile-only">Or enter a board manually →</button>
+        <details class="example-options"><summary>Example position</summary><button class="text-button example" id="example">Load example <span>↗</span></button></details>
+        <button id="enter-manually" class="text-button mobile-only">Enter board manually →</button>
         <div id="source-image" class="source-image" hidden><div class="mini-label">SOURCE IMAGE <button id="toggle-image" class="text-button">Hide</button></div><img id="preview" alt="Uploaded Wordfeud screenshot"></div>
         <div class="steps-note"><span class="note-icon">↳</span><p>Use a full, unzoomed screenshot with the dark board theme. Your image is processed locally.</p></div>
         <div class="dictionary-note"><div class="mini-label">THE WORD LIST</div><strong id="dictionary-name">Swedish · DSSO</strong><p>An open spelling dictionary, not Wordfeud’s official SAOL list. Some accepted words may differ.</p></div>
       </aside>
       <section class="board-panel" aria-label="Position editor">
-        <div class="board-heading"><div class="section-label"><span>02</span> <span class="board-title-text">CHECK YOUR BOARD</span></div><button id="clear" class="text-button">Clear board</button></div>
-        <div class="board-toolbar"><span id="board-summary">An empty board. A fresh start.</span></div>
+        <div class="board-heading"><div class="section-label"><span>02</span> <span class="board-title-text">BOARD</span></div><button id="clear" class="text-button">Clear board</button></div>
+        <div class="board-toolbar"><span id="board-summary">Empty board</span></div>
         <div class="board-frame"><div class="column-labels" aria-hidden="true"></div><div class="board-with-rows"><div class="row-labels" aria-hidden="true"></div><div id="board" class="board" aria-label="15 by 15 board"></div></div></div>
         <div class="board-legend"><span><i class="legend-dot new-dot"></i> Suggested tiles</span><span><i class="legend-dot uncertain-dot"></i> Check recognition</span><button id="clear-preview" class="text-button" hidden>Clear preview ×</button></div>
         <div id="move-preview-bar" class="mobile-only" aria-live="polite"><button id="previous-move" class="preview-arrow" aria-label="Previous move">‹</button><div><strong id="preview-word">Choose a move</strong><span id="preview-description"></span></div><strong id="preview-score"></strong><button id="next-move" class="preview-arrow" aria-label="Next move">›</button></div>
@@ -45,10 +44,9 @@
         <div class="board-actions"><button id="solve" class="primary">Find best moves <span>↗</span></button></div>
         <details class="board-options"><summary>Board tools & help</summary><label class="bonus-toggle"><input type="checkbox" id="edit-bonuses"> Edit bonus squares</label><p class="edit-help">Tap a square to edit. Arrow keys move between squares. Lowercase letters mark zero-point blanks. In bonus mode, tap to cycle multipliers.</p><div class="position-file-actions"><button class="text-button" id="export">Export position ↓</button><label class="text-button import-label">Import JSON ↑<input type="file" id="import" accept="application/json,.json" hidden></label></div><p class="edit-help">The open DSSO dictionary differs from Wordfeud’s SAOL list. Scores rank immediate points, without predicting the opponent’s reply.</p></details>
       </section>
-      <aside class="results-panel"><div class="section-label"><span>03</span> YOUR NEXT MOVE</div><div class="results-title"><h2>The possibilities</h2><span id="move-count">—</span></div><p id="results-summary">Ranked by points. Ready to explore.</p><div id="results"><div class="empty-results"><div class="empty-tiles"><span>O<sub>2</sub></span><span>R<sub>1</sub></span><span>D<sub>1</sub></span></div><h3>Good words are waiting.</h3><p>Add a screenshot or enter your board and rack, then find your next move.</p></div></div><p class="results-footnote"><span class="desktop-result-note">Scores include new cross-words and tile bonuses. This version maximizes immediate points; it does not predict an opponent’s reply.<br><br></span><span id="dictionary-disclaimer">The open DSSO dictionary differs from Wordfeud’s official SAOL list. Verify word acceptance in the game.</span></p></aside>
+      <aside class="results-panel"><div class="section-label"><span>03</span> RESULTS</div><div class="results-title"><h2>Moves</h2><span id="move-count">—</span></div><p id="results-summary">Sorted by score.</p><div id="results"><div class="empty-results"><h3>No results yet</h3><p>Enter a board and rack, then select Find best moves.</p></div></div><p class="results-footnote"><span class="desktop-result-note">Scores include new cross-words and tile bonuses. This version maximizes immediate points; it does not predict an opponent’s reply.<br><br></span><span id="dictionary-disclaimer">The open DSSO dictionary differs from Wordfeud’s official SAOL list. Verify word acceptance in the game.</span></p></aside>
     </div>
     <div class="mobile-primary"><button id="mobile-solve" class="primary">Find best moves ↗</button></div>
-    <footer><span>Built for the love of a good word.</span><span>SWEDISH WORD ANALYSIS <span class="footer-dot">·</span> C++ ENGINE</span></footer>
   </main>
   <nav class="mobile-nav" aria-label="Workspace views"><button data-view="upload" aria-pressed="true"><span>01</span> Image</button><button data-view="board" aria-pressed="false"><span>02</span> Board</button><button data-view="moves" aria-pressed="false" disabled><span>03</span> Moves <small id="mobile-move-count"></small></button></nav>
 </body>

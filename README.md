@@ -13,7 +13,7 @@ Requires Python 3.11+, CMake, and a C++17 compiler. On macOS, install Apple's co
 ./scripts/run.sh
 ```
 
-Open **http://127.0.0.1:8000** on your Mac. Choose **Choose from Photos** or **Paste image**. On desktop, dropping an image and Cmd/Ctrl+V also work. Expand **Try an example** to process the included `IMG_3527.PNG` through the same reader as uploads.
+Open **http://127.0.0.1:8000** on your Mac. Choose **Choose from Photos** or **Paste image**. On desktop, dropping an image and Cmd/Ctrl+V also work. Expand **Example position** to load the bundled board and rack without a personal screenshot.
 
 1. Review the board and rack. Orange outlines flag uncertain board tiles. Recognition warnings also cover rack tiles.
 2. Click a square to correct it; use arrow keys to navigate. Delete clears a square. Use a lowercase board letter for a zero-point blank, and `?` for a blank in your rack.
